@@ -1,0 +1,8 @@
+syntax: regexp
+\/\..*\.swp$
+^\..*\.swp$
+^ebin\/.*
+^doc\/.*
+^\.eunit\/.*
+^erl_crash\.dump$
+
