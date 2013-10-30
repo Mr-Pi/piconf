@@ -2,6 +2,7 @@ syntax: regexp
 \/\..*\.swp$
 ^\..*\.swp$
 ^ebin\/.*
+^deps\/.*
 ^doc\/.*
 ^\.eunit\/.*
 ^erl_crash\.dump$
