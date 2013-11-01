@@ -34,7 +34,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-	io:format(" *** ~p: start link~n~n", [?MODULE]),
+	lager:debug("~p: start link", [?MODULE]),
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%%===================================================================
@@ -53,7 +53,7 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-	io:format(" *** ~p: init:~n\tOpts='[]'~n~n", [?MODULE]),
+	lager:debug("~p: init: Opts='[]'", [?MODULE]),
 	State = #state{},
 	{ok, State}.
 
@@ -71,8 +71,8 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_call(_Request, _From, State) ->
-	io:format(" *** ~p: unexpected call:~n\tRequest='~p', From='~p', State='~p'~n~n", [?MODULE, _Request, _From, State]),
+handle_call(Request, From, State) ->
+	lager:warning("~p: unexpected call: Request='~p', From='~p', State='~p'", [?MODULE, Request, From, State]),
 	Reply = ok,
 	{reply, Reply, State}.
 
@@ -86,8 +86,8 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_cast(_Msg, State) ->
-	io:format(" *** ~p: unexpected cast:~n\tMsg='~p', State='~p'~n~n", [?MODULE, _Msg, State]),
+handle_cast(Msg, State) ->
+	lager:warning("~p: unexpected cast: Msg='~p', State='~p'", [?MODULE, Msg, State]),
 	{noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -100,8 +100,8 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info(_Info, State) ->
-	io:format(" *** ~p: unexpected info:~n\tInfo='~p', State='~p'~n~n", [?MODULE, _Info, State]),
+handle_info(Info, State) ->
+	lager:warning("~p: unexpected info: Info='~p', State='~p'", [?MODULE, Info, State]),
 	{noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -115,8 +115,8 @@ handle_info(_Info, State) ->
 %% @spec terminate(Reason, State) -> void()
 %% @end
 %%--------------------------------------------------------------------
-terminate(_Reason, _State) ->
-	io:format(" *** ~p: terminate:~n\tReason='~p', State='~p'~n~n", [?MODULE, _Reason, _State]),
+terminate(Reason, State) ->
+	lager:debug("~p: terminate: Reason='~p', State='~p'", [?MODULE, Reason, State]),
 	ok.
 
 %%--------------------------------------------------------------------
@@ -127,8 +127,8 @@ terminate(_Reason, _State) ->
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
 %% @end
 %%--------------------------------------------------------------------
-code_change(_OldVsn, State, _Extra) ->
-	io:format(" *** ~p: code change:~n\tOldVsn='~p', State='~p', Extra='~p'~n~n", [?MODULE, _OldVsn, State, _Extra]),
+code_change(OldVsn, State, Extra) ->
+	lager:notice("~p: code change: OldVsn='~p', State='~p', Extra='~p'", [?MODULE, OldVsn, State, Extra]),
 	{ok, State}.
 
 %%%===================================================================

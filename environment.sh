@@ -15,7 +15,7 @@ else
 	MAXWIDTH=`tput cols`
 	RWIDTH=$((MAXWIDTH/3))
 
-	tmux split-window -h 'while true; do clear; ./start-dev.sh; echo $?; sleep 1; done'
+	tmux split-window -h 
 	tmux resize-pane -x $RWIDTH
 	tmux split-window 'while true; do rebar get-deps && hg status && sleep 2; done'
 	tmux resize-pane -y 13

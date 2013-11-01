@@ -1,6 +1,6 @@
 {application, piconf,
  [
-  {description, ""},
+  {description, "erlang shared config application"},
   {vsn, "1.0.0-a1"},
   {registered, []},
   {applications, [

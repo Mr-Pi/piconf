@@ -4,6 +4,7 @@ syntax: regexp
 ^ebin\/.*
 ^deps\/.*
 ^doc\/.*
+^log\/.*
 ^\.eunit\/.*
 ^erl_crash\.dump$
 
