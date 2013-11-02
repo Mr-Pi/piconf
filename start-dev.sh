@@ -1,7 +1,7 @@
 APPNAME='piconf'
 rebar compile
 echo "cert $CERTFILE"
-erl -name "${APPNAME}_${RANDOM}" -pa ebin deps/*/ebin \
+erl -name "${APPNAME}_${RANDOM}@`hostname`" -pa ebin deps/*/ebin \
 	-eval "application:start(lager)." \
 	-eval "lager:set_loglevel(lager_console_backend,debug)." \
 	-eval "application:start($APPNAME)."

@@ -29,7 +29,7 @@ else
 	export ENVIRONMENT='erlang'
 	
 	alias rs="tmux send-keys -t 1 'halt().' C-m"
-	alias vim="vim +\"map %R :!tmux send-keys -t 1 'halt().' C-m<CR><CR>\" +\"imap %R <ESC>%Ra\""
+	alias vim="vim +\"map %R :!tmux send-keys -t 1 'halt().' C-m<CR><CR>\" +\"imap %R <ESC>%Ra\" +\"map %T :!tmux send-keys -t 1 'piconf:reboot().' C-m<CR><CR>\""
 	
 	vim +"map %R :!tmux send-keys -t 1 'halt().' C-m<CR><CR>" +"imap %R <ESC>%Ra"
 fi

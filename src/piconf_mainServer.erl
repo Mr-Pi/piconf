@@ -20,7 +20,9 @@
 	 terminate/2,
 	 code_change/3]).
 
--record(state, {}).
+-record(state, {synced=false}).
+
+-type nodes() :: [node(),...].
 
 %%%===================================================================
 %%% API
@@ -54,6 +56,9 @@ start_link() ->
 %%--------------------------------------------------------------------
 init([]) ->
 	lager:debug("~p: init: Opts='[]'", [?MODULE]),
+	connect_all_local(),
+	getLocalConfig(["/etc/piconf/piconf.config", "/tmp/piconf.config"]),
+	net_kernel:monitor_nodes(true),
 	State = #state{},
 	{ok, State}.
 
@@ -100,6 +105,16 @@ handle_cast(Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_info(reboot, State) ->
+	lager:notice("reboot"),
+	halt(),
+	{noreply, State};
+handle_info({nodedown, Node}, State) ->
+	lager:info("~p: lost node ~p", [?MODULE, Node]),
+	{noreply, State};
+handle_info({nodeup, Node}, State) ->
+	lager:info("~p: added node ~p", [?MODULE, Node]),
+	{noreply, State};
 handle_info(Info, State) ->
 	lager:warning("~p: unexpected info: Info='~p', State='~p'", [?MODULE, Info, State]),
 	{noreply, State}.
@@ -136,3 +151,43 @@ code_change(OldVsn, State, Extra) ->
 %%%===================================================================
 
 
+%% @private
+%% @doc connects to all available local nodes
+%% @end
+-spec connect_all_local() -> true.
+connect_all_local() ->
+	lager:debug("~p: function call: connect_all_local()", [?MODULE]),
+	{ok, NodesPrefixIn} = net_adm:names(),
+	Domains = [ lists:last(string:tokens(atom_to_list(node()),[$@])) | [net_adm:localhost()] ],
+	NodesPrefix = lists:map(fun(X) -> {NodePrefix,_}=X, NodePrefix end, NodesPrefixIn),
+	Nodes = [ list_to_atom(NodePrefix ++ "@" ++ Domain) || NodePrefix <- NodesPrefix, Domain <- Domains ],
+	ping_nodes(Nodes).
+	
+
+%% @private
+%% @doc ping(connect) nodes
+%% @end
+-spec ping_nodes(nodes() | []) -> true.
+ping_nodes(Nodes) ->
+	lager:debug("~p: function call: ping_nodes(Nodes)", [?MODULE]),
+	is_list(net_adm:ping_list(Nodes)).
+
+
+%% @private
+%% @doc read config file, and valid version number
+%% @end
+-spec getLocalConfig([string()]) -> term().
+getLocalConfig(ConfigFiles) ->
+	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
+	getLocalConfig(ConfigFiles, []).
+
+%% @private
+-spec getLocalConfig([string()], term()) -> term().
+getLocalConfig([], Config) ->
+	lager:debug("~p: function call: getLocalConfig([], Config)", [?MODULE]),
+	Config;
+%% @private
+getLocalConfig(ConfigFiles, Config) ->
+	lager:debug("~p: function call: getLocalConfig(ConfigFiles, Config)", [?MODULE]),
+	[ConfigFile|ConfigFilesRest] = ConfigFiles,
+	getLocalConfig(ConfigFilesRest, [ConfigFile|Config]).
