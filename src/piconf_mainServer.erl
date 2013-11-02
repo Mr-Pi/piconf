@@ -9,6 +9,8 @@
 
 -behaviour(gen_server).
 
+-include("piconf.hrl").
+
 %% API
 -export([start_link/0]).
 
@@ -57,7 +59,6 @@ start_link() ->
 init([]) ->
 	lager:debug("~p: init: Opts='[]'", [?MODULE]),
 	connect_all_local(),
-	getLocalConfig(["/etc/piconf/piconf.config", "/tmp/piconf.config"]),
 	net_kernel:monitor_nodes(true),
 	State = #state{},
 	{ok, State}.
@@ -173,21 +174,3 @@ ping_nodes(Nodes) ->
 	is_list(net_adm:ping_list(Nodes)).
 
 
-%% @private
-%% @doc read config file, and valid version number
-%% @end
--spec getLocalConfig([string()]) -> term().
-getLocalConfig(ConfigFiles) ->
-	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
-	getLocalConfig(ConfigFiles, []).
-
-%% @private
--spec getLocalConfig([string()], term()) -> term().
-getLocalConfig([], Config) ->
-	lager:debug("~p: function call: getLocalConfig([], Config)", [?MODULE]),
-	Config;
-%% @private
-getLocalConfig(ConfigFiles, Config) ->
-	lager:debug("~p: function call: getLocalConfig(ConfigFiles, Config)", [?MODULE]),
-	[ConfigFile|ConfigFilesRest] = ConfigFiles,
-	getLocalConfig(ConfigFilesRest, [ConfigFile|Config]).

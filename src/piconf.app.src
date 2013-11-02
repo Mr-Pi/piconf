@@ -1,12 +1,14 @@
-{application, piconf,
- [
-  {description, "erlang shared config application"},
-  {vsn, "1.0.0-a1"},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {mod, { piconf_app, []}},
-  {env, []}
- ]}.
+%% vi: ft=erlang
+{application, piconf, [
+	{description, "erlang shared config application"},
+	{vsn, "1.0.0-a1"},
+	{registered, []},
+	{applications, [
+		kernel,
+		stdlib
+	]},
+	{mod, {piconf_app, []}},
+	{env, [
+		{configfiles, ["/etc/piconf/piconf.config", "/tmp/piconf.config"]}
+	]}
+]}.
