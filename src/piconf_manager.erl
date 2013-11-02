@@ -9,12 +9,13 @@
 
 -include("piconf.hrl").
 
--export([evalLocalConfig/1, getLocalConfig/1]).
+-export([evalLocalConfig/0, getLocalConfig/0]).
 
 %% @doc evaluate config file, and set application env
 %% @end
--spec evalLocalConfig([string()]) -> none().
-evalLocalConfig(ConfigFiles) ->
+-spec evalLocalConfig() -> none().
+evalLocalConfig() ->
+	{ok, ConfigFiles} = application:get_env(piconf,configfiles),
 	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
 	Config = getLocalConfig(ConfigFiles, #config{}),
 	io:format("config: ~p", [Config]),
@@ -26,8 +27,9 @@ evalLocalConfig(ConfigFiles) ->
 
 %% @doc returns local config
 %% @end
--spec getLocalConfig([string()]) -> term().
-getLocalConfig(ConfigFiles) ->
+-spec getLocalConfig() -> term().
+getLocalConfig() ->
+	{ok, ConfigFiles} = application:get_env(piconf,configfiles),
 	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
 	getLocalConfig(ConfigFiles, #config{}).
 
