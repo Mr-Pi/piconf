@@ -14,6 +14,6 @@
 %% @end
 -spec reboot() -> no_return().
 reboot() ->
-	lager:debug("~p: function call: reboot()", [?MODULE]),
+	lager:debug("function call: reboot()"),
 	lists:map(fun(X) -> {piconf_mainServer, X} ! reboot end, nodes()),
 	erlang:send_after(20, piconf_mainServer, reboot).

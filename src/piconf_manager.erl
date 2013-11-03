@@ -15,10 +15,9 @@
 %% @end
 -spec evalLocalConfig() -> none().
 evalLocalConfig() ->
+	lager:debug("evaluate local config file"),
 	{ok, ConfigFiles} = application:get_env(piconf,configfiles),
-	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
 	Config = getLocalConfig(ConfigFiles, #config{}),
-	io:format("config: ~p", [Config]),
 	[
 		[application:set_env(App, Key, Val) || {Key,Val} <- Opts]
 		|| {App,Opts} <- Config#config.env
@@ -29,8 +28,8 @@ evalLocalConfig() ->
 %% @end
 -spec getLocalConfig() -> term().
 getLocalConfig() ->
+	lager:debug("read local config"),
 	{ok, ConfigFiles} = application:get_env(piconf,configfiles),
-	lager:debug("~p: function call: getLocalConfig(ConfigFiles)", [?MODULE]),
 	getLocalConfig(ConfigFiles, #config{}).
 
 %% @private
@@ -38,10 +37,8 @@ getLocalConfig() ->
 %% @end
 -spec getLocalConfig([string()], term()) -> term().
 getLocalConfig([], Config) ->
-	lager:debug("~p: function call: getLocalConfig([], ~p)", [?MODULE, Config]),
 	Config;
 getLocalConfig(ConfigFiles, Config) ->
-	lager:debug("~p: function call: getLocalConfig(~p, ~p)", [?MODULE, ConfigFiles, Config]),
 	[ConfigFile|ConfigFilesRest] = ConfigFiles,
 	NewConfig = case file:consult(ConfigFile) of
 		{error, _} ->
@@ -60,7 +57,6 @@ getLocalConfig(ConfigFiles, Config) ->
 %% @end
 -spec mergeConfig(term(), term()) -> term().
 mergeConfig(Config1, Config2) ->
-	lager:debug("~p: function call: mergeConfig(Config1, Config2)", [?MODULE]),
 	{Vsn, PiConf, Env} = case Config1#config.vsn > Config2#config.vsn of
 		true ->
 			{Config1#config.vsn,

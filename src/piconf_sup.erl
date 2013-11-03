@@ -30,7 +30,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-	lager:debug("~p: start link", [?MODULE]),
+	lager:debug("start link"),
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %%%===================================================================
@@ -51,7 +51,7 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-	lager:debug("~p: init: Opts='[]'", [?MODULE]),
+	lager:debug("init: Opts='[]'"),
 	Module = ?CHILD(piconf_mainServer, piconf_mainServer, worker, []),
 	{ok, {{one_for_one, 5, 10}, [Module]}}.
 

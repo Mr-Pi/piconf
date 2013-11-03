@@ -39,8 +39,6 @@ start(_StartType, _StartArgs) ->
 	lists:foreach(fun(Dep) ->
 		ok = application:ensure_started(Dep) end, ?DEPS),
 	piconf_manager:evalLocalConfig(),
-	lists:foreach(fun(Dep) ->
-		application:stop(Dep), application:start(Dep) end, ?DEPS),
 	piconf_sup:start_link().
 
 %%--------------------------------------------------------------------

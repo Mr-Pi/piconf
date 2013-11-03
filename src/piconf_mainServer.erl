@@ -41,7 +41,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-	lager:debug("~p: start link", [?MODULE]),
+	lager:debug("start link"),
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%%===================================================================
@@ -60,13 +60,13 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-	lager:debug("~p: init: Opts='[]'", [?MODULE]),
+	lager:debug("init: Opts='[]'"),
 	connect_all_local(),
 	Config = piconf_manager:getLocalConfig(),
 	State = #state{vsn=Config#config.vsn, piconf=Config#config.piconf},
 	[erlang:spawn_link(fun() ->
 		try_reconnect(?NODE_RECONNECT_TIME, ?NODE_RECONNECT_COUNT, Node) end)
-		|| Node <- proplists:get_value(nodes,State#state.piconf)],
+		|| Node <- proplists:get_value(nodes,State#state.piconf,[])],
 	net_kernel:monitor_nodes(true),
 	{ok, State}.
 
@@ -84,9 +84,12 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_call(test, From, State) ->
+	lager:warning("test call: From='~p', State='~p'", [From, lager:pr(State,?MODULE)]),
+	{noreply, State};
 handle_call(Request, From, State) ->
-	lager:warning("~p: unexpected call: Request='~p', From='~p', State='~p'", [?MODULE, Request, From, State]),
-	Reply = ok,
+	lager:warning("unexpected call: Request='~p', From='~p', State='~p'", [Request, From, lager:pr(State,?MODULE)]),
+	Reply = unexpected,
 	{reply, Reply, State}.
 
 %%--------------------------------------------------------------------
@@ -100,7 +103,7 @@ handle_call(Request, From, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_cast(Msg, State) ->
-	lager:warning("~p: unexpected cast: Msg='~p', State='~p'", [?MODULE, Msg, State]),
+	lager:warning("unexpected cast: Msg='~p', State='~p'", [Msg, lager:pr(State,?MODULE)]),
 	{noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -118,17 +121,17 @@ handle_info(reboot, State) ->
 	halt(),
 	{noreply, State};
 handle_info({nodedown, Node}, State) ->
-	lager:info("~p: lost node ~p", [?MODULE, Node]),
-	case lists:member(Node, proplists:get_value(nodes, State#state.piconf)) of
+	lager:info("lost node ~p", [Node]),
+	case lists:member(Node, proplists:get_value(nodes, State#state.piconf,[])) of
 		true -> erlang:spawn_link(fun() -> try_reconnect(?NODE_RECONNECT_TIME,?NODE_RECONNECT_COUNT,Node) end);
 		_ -> false
 	end,
 	{noreply, State};
 handle_info({nodeup, Node}, State) ->
-	lager:info("~p: added node ~p", [?MODULE, Node]),
+	lager:info("added node ~p", [Node]),
 	{noreply, State};
 handle_info(Info, State) ->
-	lager:warning("~p: unexpected info: Info='~p', State='~p'", [?MODULE, Info, State]),
+	lager:warning("unexpected info: Info='~p', State='~p'", [Info, lager:pr(State,?MODULE)]),
 	{noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -143,7 +146,7 @@ handle_info(Info, State) ->
 %% @end
 %%--------------------------------------------------------------------
 terminate(Reason, State) ->
-	lager:debug("~p: terminate: Reason='~p', State='~p'", [?MODULE, Reason, State]),
+	lager:debug("terminate: Reason='~p', State='~p'", [Reason, lager:pr(State,?MODULE)]),
 	ok.
 
 %%--------------------------------------------------------------------
@@ -155,7 +158,7 @@ terminate(Reason, State) ->
 %% @end
 %%--------------------------------------------------------------------
 code_change(OldVsn, State, Extra) ->
-	lager:notice("~p: code change: OldVsn='~p', State='~p', Extra='~p'", [?MODULE, OldVsn, State, Extra]),
+	lager:notice("code change: OldVsn='~p', State='~p', Extra='~p'", [OldVsn, lager:pr(State,?MODULE), Extra]),
 	{ok, State}.
 
 %%%===================================================================
@@ -168,7 +171,7 @@ code_change(OldVsn, State, Extra) ->
 %% @end
 -spec connect_all_local() -> true.
 connect_all_local() ->
-	lager:debug("~p: function call: connect_all_local()", [?MODULE]),
+	lager:debug("connect all local nodes"),
 	{ok, NodesPrefixIn} = net_adm:names(),
 	Domains = [ lists:last(string:tokens(atom_to_list(node()),[$@])) | [net_adm:localhost()] ],
 	NodesPrefix = lists:map(fun(X) -> {NodePrefix,_}=X, NodePrefix end, NodesPrefixIn),
@@ -180,17 +183,17 @@ connect_all_local() ->
 %% @end
 -spec try_reconnect(pos_integer(), non_neg_integer(), node()) -> none().
 try_reconnect(_Time, 0, Node) ->
-	lager:debug("~p: try reconnect node ~p", [?MODULE, Node]),
+	lager:debug("try reconnect node ~p", [Node]),
 	case net_adm:ping(Node) of
-		pong -> lager:info("~p: reconnect node ~p successful", [?MODULE, Node]);
-		pang -> lager:error("~p: failed to reconnect node ~p", [?MODULE, Node])
+		pong -> lager:info("reconnect node ~p successful", [Node]);
+		pang -> lager:error("failed to reconnect node ~p", [Node])
 	end;
 try_reconnect(Time, Count, Node) ->
-	lager:debug("~p: try reconnect node ~p", [?MODULE, Node]),
+	lager:debug("try reconnect node ~p", [Node]),
 	case net_adm:ping(Node) of
-		pong -> lager:info("~p: reconnect node ~p successful", [?MODULE, Node]);
+		pong -> lager:info("reconnect node ~p successful", [Node]);
 		pang ->
-			lager:debug("~p: remaining retries ~p", [?MODULE, Count-1]),
+			lager:debug("remaining retries ~p", [Count-1]),
 			timer:sleep(Time),
 			try_reconnect(Time, Count-1, Node)
 	end.
