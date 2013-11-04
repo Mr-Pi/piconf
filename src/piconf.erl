@@ -7,8 +7,21 @@
 %%%-------------------------------------------------------------------
 -module(piconf).
 
--export([reboot/0]).
+-export([reboot/0,get/1,get/2]).
 
+-define(NYI, lager:debug("not yet implemented"), throw(not_yet_implemented)).
+
+%% @doc get global config value
+%% @end
+-spec get(term()) -> term() | undefined.
+get(Key) ->
+	?NYI.
+
+%% @doc get config value
+%% @end
+-spec get(atom(), term()) -> term() | undefined.
+get(App, Key) ->
+	?NYI.
 
 %% @doc reboots all nodes
 %% @end
